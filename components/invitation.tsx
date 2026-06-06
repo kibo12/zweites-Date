@@ -80,7 +80,7 @@ export function Invitation() {
               : "Wir finden bestimmt einen passenden Tag. Ich freue mich schon."}
           </p>
           <p className="text-sm font-medium text-primary">
-            {wantsFood ? "Und Hunger bringen wir auch mit! 🍕" : "Fokus voll auf die Kunst gerichtet. 🏛️"}
+            {wantsFood ? "Und Hunger bringen wir auch mit! 🍕" : "🏛️"}
           </p>
           <p className="text-xs leading-relaxed text-muted-foreground text-pretty">
             Wallraf-Richartz-Museum &middot; bevor es schließt.
