@@ -139,14 +139,14 @@ export function Invitation() {
             <button
               type="button"
               onClick={() => {
-                setLetYouChoose(true)
+                setLetYouChoose(!letYouChoose) // Wechselt jetzt zwischen true und false hin und her
                 setSelectedDateTime("")
               }}
               className={`mx-auto text-sm underline-offset-4 transition-colors hover:underline ${
-                letYouChoose ? "text-primary" : "text-muted-foreground"
+                letYouChoose ? "text-primary font-medium" : "text-muted-foreground"
               }`}
             >
-              Oder: such du einfach aus
+              {letYouChoose ? "Oder: Ich wähle doch selbst ein Datum" : "Oder: Such du einfach aus"}
             </button>
           </div>
 
