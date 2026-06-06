@@ -5,24 +5,41 @@ import { submitResponse } from "@/app/actions/responses"
 
 type Step = "ask" | "sweet" | "when" | "done"
 
-const days = ["Samstag", "Sonntag"]
-const times = ["Vormittag", "Nachmittag"]
-
 export function Invitation() {
   const [step, setStep] = useState<Step>("ask")
   // how many times "Nein" was pressed (used to nudge the user)
   const [noCount, setNoCount] = useState(0)
-  const [selectedDay, setSelectedDay] = useState<string | null>(null)
-  const [selectedTime, setSelectedTime] = useState<string | null>(null)
+  const [selectedDateTime, setSelectedDateTime] = useState<string>("")
   const [letYouChoose, setLetYouChoose] = useState(false)
+
+  // Hilfsfunktion zur Formatierung des Datums in ein schönes deutsches Format
+  function formatGermanDateTime(dateTimeString: string): string {
+    if (!dateTimeString) return ""
+    const dateObj = new Date(dateTimeString)
+    
+    // Prüfen, ob das Datum gültig ist
+    if (isNaN(dateObj.getTime())) return ""
+
+    const options: Intl.DateTimeFormatOptions = {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }
+    
+    return dateObj.toLocaleDateString("de-DE", options) + " Uhr"
+  }
+
+  const formattedLabel = selectedDateTime ? formatGermanDateTime(selectedDateTime) : null
 
   const chosenLabel = letYouChoose
     ? "Such du aus"
-    : selectedDay && selectedTime
-      ? `${selectedDay} ${selectedTime}`
+    : formattedLabel
+      ? formattedLabel
       : null
 
-  const canConfirm = letYouChoose || (selectedDay && selectedTime)
+  const canConfirm = letYouChoose || selectedDateTime !== ""
 
   function handleNo() {
     const next = noCount + 1
@@ -47,7 +64,7 @@ export function Invitation() {
           </p>
           <p className="text-sm leading-relaxed text-muted-foreground text-pretty">
             {chosenLabel && chosenLabel !== "Such du aus"
-              ? `${chosenLabel} also. Ich freue mich schon.`
+              ? `Am ${chosenLabel} also. Ich freue mich schon.`
               : "Wir finden bestimmt einen passenden Tag. Ich freue mich schon."}
           </p>
           <p className="text-xs leading-relaxed text-muted-foreground text-pretty">
@@ -85,7 +102,7 @@ export function Invitation() {
     )
   }
 
-  // 3) When question — pick a day and a time of day on one page
+  // 3) When question — pick a precise date and time via calendar
   if (step === "when") {
     return (
       <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-6 py-16">
@@ -103,57 +120,19 @@ export function Invitation() {
           <div className="flex w-full flex-col gap-6">
             <div className="space-y-3">
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Tag
+                Datum & Uhrzeit wählen
               </p>
-              <div className="flex flex-wrap justify-center gap-3">
-                {days.map((day) => {
-                  const active = !letYouChoose && selectedDay === day
-                  return (
-                    <button
-                      key={day}
-                      type="button"
-                      onClick={() => {
-                        setLetYouChoose(false)
-                        setSelectedDay(day)
-                      }}
-                      className={`rounded-full border px-6 py-2.5 text-sm font-medium transition-colors ${
-                        active
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-border text-foreground hover:bg-muted"
-                      }`}
-                    >
-                      {day}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Tageszeit
-              </p>
-              <div className="flex flex-wrap justify-center gap-3">
-                {times.map((time) => {
-                  const active = !letYouChoose && selectedTime === time
-                  return (
-                    <button
-                      key={time}
-                      type="button"
-                      onClick={() => {
-                        setLetYouChoose(false)
-                        setSelectedTime(time)
-                      }}
-                      className={`rounded-full border px-6 py-2.5 text-sm font-medium transition-colors ${
-                        active
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-border text-foreground hover:bg-muted"
-                      }`}
-                    >
-                      {time}
-                    </button>
-                  )
-                })}
+              <div className="flex justify-center w-full">
+                <input
+                  type="datetime-local"
+                  value={selectedDateTime}
+                  disabled={letYouChoose}
+                  onChange={(e) => {
+                    setLetYouChoose(false)
+                    setSelectedDateTime(e.target.value)
+                  }}
+                  className="w-full max-w-xs rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-40"
+                />
               </div>
             </div>
 
@@ -161,8 +140,7 @@ export function Invitation() {
               type="button"
               onClick={() => {
                 setLetYouChoose(true)
-                setSelectedDay(null)
-                setSelectedTime(null)
+                setSelectedDateTime("")
               }}
               className={`mx-auto text-sm underline-offset-4 transition-colors hover:underline ${
                 letYouChoose ? "text-primary" : "text-muted-foreground"
@@ -179,7 +157,7 @@ export function Invitation() {
             className="rounded-full bg-primary px-8 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {chosenLabel && chosenLabel !== "Such du aus"
-              ? `${chosenLabel} — passt`
+              ? "Bestätigen"
               : "Passt"}
           </button>
         </div>
@@ -198,7 +176,7 @@ export function Invitation() {
           </p>
           <p className="text-base leading-relaxed text-muted-foreground text-pretty">
             Das Wallraf-Richartz-Museum schließt nächsten Monat für längere
-            Zeit. Das wäre doch einen gemeinsamen Besuch wert, oder?
+            zeit. Das wäre doch einen gemeinsamen Besuch wert, oder?
           </p>
         </div>
 
