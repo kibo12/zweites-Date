@@ -86,7 +86,7 @@ export function Invitation() {
               Wusste ich&apos;s doch.
             </p>
             <p className="text-base leading-relaxed text-muted-foreground text-pretty">
-              Lass uns herausfinden, welches Gemälde der beste Blickfang ist,
+              Lass uns herausfinden, welches Kunstwerk der beste Blickfang ist,
               auch wenn ich schon weiß, dass es nicht an der Wand hängen wird. ;)
             </p>
           </div>
