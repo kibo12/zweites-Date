@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { submitResponse } from "@/app/actions/responses"
 
-type Step = "ask" | "sweet" | "when" | "done"
+type Step = "ask" | "sweet" | "when" | "food" | "done"
 
 export function Invitation() {
   const [step, setStep] = useState<Step>("ask")
@@ -11,6 +11,7 @@ export function Invitation() {
   const [noCount, setNoCount] = useState(0)
   const [selectedDateTime, setSelectedDateTime] = useState<string>("")
   const [letYouChoose, setLetYouChoose] = useState(false)
+  const [wantsFood, setWantsFood] = useState<boolean | null>(null)
 
   // Hilfsfunktion zur Formatierung des Datums in ein schönes deutsches Format
   function formatGermanDateTime(dateTimeString: string): string {
@@ -48,9 +49,20 @@ export function Invitation() {
     void submitResponse("Nein", null)
   }
 
-  function handleConfirm() {
+  // Schaltet von der Zeitauswahl weiter zur Essensfrage
+  function handleGoToFood() {
     if (!canConfirm) return
-    void submitResponse("Ja", chosenLabel)
+    setStep("food")
+  }
+
+  // Sendet am Ende alle gesammelten Antworten ab
+  function handleFinalConfirm() {
+    if (wantsFood === null) return
+    
+    const foodSuffix = wantsFood ? " (Danach noch was essen 🍕)" : " (Nur Museum 🏛️)"
+    const finalResponseLabel = chosenLabel ? `${chosenLabel}${foodSuffix}` : `Datum offen${foodSuffix}`
+    
+    void submitResponse("Ja", finalResponseLabel)
     setStep("done")
   }
 
@@ -66,6 +78,9 @@ export function Invitation() {
             {chosenLabel && chosenLabel !== "Such du aus"
               ? `Am ${chosenLabel} also. Ich freue mich schon.`
               : "Wir finden bestimmt einen passenden Tag. Ich freue mich schon."}
+          </p>
+          <p className="text-sm font-medium text-primary">
+            {wantsFood ? "Und Hunger bringen wir auch mit! 🍕" : "Fokus voll auf die Kunst gerichtet. 🏛️"}
           </p>
           <p className="text-xs leading-relaxed text-muted-foreground text-pretty">
             Wallraf-Richartz-Museum &middot; bevor es schließt.
@@ -139,7 +154,7 @@ export function Invitation() {
             <button
               type="button"
               onClick={() => {
-                setLetYouChoose(!letYouChoose) // Wechselt jetzt zwischen true und false hin und her
+                setLetYouChoose(!letYouChoose)
                 setSelectedDateTime("")
               }}
               className={`mx-auto text-sm underline-offset-4 transition-colors hover:underline ${
@@ -152,14 +167,75 @@ export function Invitation() {
 
           <button
             type="button"
-            onClick={handleConfirm}
+            onClick={handleGoToFood}
             disabled={!canConfirm}
             className="rounded-full bg-primary px-8 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {chosenLabel && chosenLabel !== "Such du aus"
-              ? "Bestätigen"
-              : "Passt"}
+            Weiter
           </button>
+        </div>
+      </main>
+    )
+  }
+
+  // 4) NEW: Food question page
+  if (step === "food") {
+    return (
+      <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-6 py-16">
+        <PaintingBackdrop />
+        <div className="relative z-10 flex w-full max-w-md flex-col items-center gap-10 text-center">
+          <div className="space-y-5">
+            <p className="font-serif text-2xl leading-relaxed text-foreground text-balance">
+              Lust danach noch was essen zu gehen? 🍕
+            </p>
+            <p className="text-base leading-relaxed text-muted-foreground text-pretty">
+              Der perfekte Abschluss für den Museumsbesuch.
+            </p>
+          </div>
+
+          <div className="flex w-full flex-col gap-4 sm:flex-row sm:justify-center">
+            <button
+              type="button"
+              onClick={() => setWantsFood(true)}
+              className={`rounded-full px-8 py-3 text-sm font-medium border transition-all ${
+                wantsFood === true
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-background text-foreground border-border hover:bg-muted"
+              }`}
+            >
+              Ja, voll gerne!
+            </button>
+            <button
+              type="button"
+              onClick={() => setWantsFood(false)}
+              className={`rounded-full px-8 py-3 text-sm font-medium border transition-all ${
+                wantsFood === false
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-background text-foreground border-border hover:bg-muted"
+              }`}
+            >
+              Lieber nur Museum
+            </button>
+          </div>
+
+          <div className="flex flex-col items-center gap-4 w-full">
+            <button
+              type="button"
+              onClick={() => setStep("when")}
+              className="text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
+            >
+              Zurück zur Zeitauswahl
+            </button>
+
+            <button
+              type="button"
+              onClick={handleFinalConfirm}
+              disabled={wantsFood === null}
+              className="rounded-full bg-primary px-8 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 w-full max-w-xs"
+            >
+              Einladung abschicken
+            </button>
+          </div>
         </div>
       </main>
     )
