@@ -146,7 +146,7 @@ export function Invitation() {
                 letYouChoose ? "text-primary font-medium" : "text-muted-foreground"
               }`}
             >
-              {letYouChoose ? "Oder: Ich wähle doch selbst ein Datum" : "Oder: Such du einfach aus"}
+              {letYouChoose ? "Oder: Ich wähle doch selbst ein Datum" : "Oder: Lass Ibo aussuchen"}
             </button>
           </div>
 
